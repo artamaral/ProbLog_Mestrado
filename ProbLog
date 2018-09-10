@@ -1,0 +1,63 @@
+%%\/\/\/\/\/\/\/\/\/\/\/\/%%%
+% Fatos probabilísticos definidos a priori.
+%%\/\/\/\/\/\/\/\/\/\/\/\/%%%
+ 
+% Automóvel.
+0.50::carro(b).
+
+% Sinalização de solo de conversão a direita.
+0.50::sinalizacaoSoloD(s).
+
+% Placa de sinalização de sentido duplo.
+0.50::sinalizacaoPlacaSentidoDuplo(spsd).
+
+% Placa de sinalização de sentido único.
+0.50::sinalizacaoPlacaSentidoUnico(spsu).
+%%%-----------------%%%%
+
+%%\/\/\/\/\/\/\/\/\/\/\/\/%%%
+% Regra probabilística.
+%%\/\/\/\/\/\/\/\/\/\/\/\/%%%
+
+
+% Existe probabilidade de colisão dado um automóvel e sinalização de solo de conversão a direita.
+0.25:: colisao :- carro(X), sinalizacaoSoloD(Y).
+
+% Existe probabilidade de conversão de automóvel dada um automóvel e sinalização de solo de conversão a direita.
+0.85:: conversao :- carro(X), sinalizacaoSoloD(Y).
+
+% Existe probabilidade de colisão dada a conversão de automóvel.
+0.75::colisao:-conversao.
+
+% Existe probabilidade de uma ultrapasagem de risco acontecer dada existência de um automóvel, a  sinalização de solo de conversão a direita e as placas de sentido da via.
+0.90::risco_ultrapassagem :- carro(X),sinalizacaoSoloD(Y),sinalizacaoPlacaSentidoDuplo(Z).
+0.99::risco_ultrapassagem :- 
+carro(X),sinalizacaoSoloD(Y),\+sinalizacaoPlacaSentidoDuplo(Z), \+sinalizacaoPlacaSentidoUnico(Z).
+0.10::risco_ultrapassagem :- carro(X),sinalizacaoSoloD(Y),sinalizacaoPlacaSentidoUnico(Z),\+sinalizacaoPlacaSentidoDuplo(Z).
+
+% Existe probabilidade de colisão se houver uma ultrapassagem com risco em conjunto com a conversão de um automóvela via.
+0.75::colisao :- risco_ultrapassagem,conversao.
+
+%%\/\/\/\/\/\/\/\/\/\/\/\/%%%
+% Evidências obtidas a partir da saída da RNC.
+%%\/\/\/\/\/\/\/\/\/\/\/\/%%%
+
+% Não há sinalização de placa de sentido duplo na cena.
+evidence(sinalizacaoPlacaSentidoDuplo(spsd),false).
+
+% Não há sinalização de placa de sentido único na cena.
+evidence(sinalizacaoPlacaSentidoUnico(spsu),false).
+
+% Há sinalização de solo de conversão a direita na cena.
+evidence(sinalizacaoSoloD(s),true).
+
+% Existe um carro na cena.
+evidence(carro(b),true).
+
+%%\/\/\/\/\/\/\/\/\/\/\/\/%%%
+% Inferência
+%%\/\/\/\/\/\/\/\/\/\/\/\/%%%
+
+
+query(risco_ultrapassagem).
+query(colisao).
